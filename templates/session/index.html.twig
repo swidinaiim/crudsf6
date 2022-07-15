@@ -1,0 +1,8 @@
+{% extends 'template.html.twig' %}
+
+{% block title%}
+    session
+{% endblock %}
+{% block body %}
+    <h1>Visite Num : {{app.session.get('nbVisite')}}</h1>
+{% endblock %}

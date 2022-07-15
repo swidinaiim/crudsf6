@@ -1,0 +1,22 @@
+{% extends 'template.html.twig' %}
+    {% block body %}
+    {{ include ('fragments/date-jour.html.twig') }}
+    <div class="alert alert-warning">
+        <a href="{{ path('todo.add') }}">Add Default Todo</a>
+    </div>
+    {% block PageTitle %}Liste des todos : {% endblock %}
+        <ol class="list-group">
+            {% for name,content in app.session.get('todos') %}
+                <li class="list-group-item">
+
+                    {{ name }} : {{ content }}
+
+                </li>
+            {% endfor %}
+            
+        </ol>
+    {% endblock %}
+    
+    {% block title %}
+        ToDo
+    {% endblock %}
