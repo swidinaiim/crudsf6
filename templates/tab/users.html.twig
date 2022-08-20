@@ -1,0 +1,28 @@
+{% extends 'template.html.twig' %}
+
+{% block title %}
+    Tab users
+{% endblock %}
+
+{% block PageTitle %}
+    Tab Users
+{% endblock %}
+{% block body %}      
+    {{ include('fragments/date-jour.html.twig') }}
+    <table class="table">
+        <tr>
+            <th>#</th>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Age</th>
+        </tr>
+        {% for user in users %}
+        <tr class="table-{% if loop.index is odd %}danger{% else %}warning{% endif %}">
+            <td>{{ loop.index }}</td>
+            <td>{{ user.firstname }}</td>
+            <td>{{ user.lastname }}</td>
+            <td>{{ user.age }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

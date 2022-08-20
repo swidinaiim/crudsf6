@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Perrsonne;
+use App\Entity\Profile;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Perrsonne>
+ * @extends ServiceEntityRepository<Profile>
  *
- * @method Perrsonne|null find($id, $lockMode = null, $lockVersion = null)
- * @method Perrsonne|null findOneBy(array $criteria, array $orderBy = null)
- * @method Perrsonne[]    findAll()
- * @method Perrsonne[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Profile|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Profile|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Profile[]    findAll()
+ * @method Profile[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PerrsonneRepository extends ServiceEntityRepository
+class ProfileRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Perrsonne::class);
+        parent::__construct($registry, Profile::class);
     }
 
-    public function add(Perrsonne $entity, bool $flush = false): void
+    public function add(Profile $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class PerrsonneRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Perrsonne $entity, bool $flush = false): void
+    public function remove(Profile $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class PerrsonneRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Perrsonne[] Returns an array of Perrsonne objects
+//     * @return Profile[] Returns an array of Profile objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class PerrsonneRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Perrsonne
+//    public function findOneBySomeField($value): ?Profile
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')
