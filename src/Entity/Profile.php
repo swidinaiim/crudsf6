@@ -4,10 +4,16 @@ namespace App\Entity;
 
 use App\Repository\ProfileRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Traits\TimeStampTrait;
 
 #[ORM\Entity(repositoryClass: ProfileRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+
 class Profile
 {
+
+    use TimeStampTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -72,4 +78,10 @@ class Profile
 
         return $this;
     }
+
+    public function __toString(): string
+    {
+        return $this->rs. " " .$this->url;
+    }   
+
 }

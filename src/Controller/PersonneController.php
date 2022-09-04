@@ -2,22 +2,34 @@
 
 namespace App\Controller;
 
+use App\Form\PersonneType;
 use App\Entity\Personne;
+use App\Service\Helpers;
+use App\Service\MailerService;
+use App\Service\UploaderService;
 use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/personne')]
 
 class PersonneController extends AbstractController
 {
+     public function __construct(private LoggerInterface $logger, private Helpers $helper)
+     {
+     }
 
     #[Route('/', name: 'personne.list')]
     public function index(ManagerRegistry $doctrine):Response
     {
+        echo $this->helper->SayCc();
         $repository = $doctrine->getRepository(persistentObject:Personne::class);
         $personnes = $repository->findAll();
         
@@ -76,26 +88,117 @@ class PersonneController extends AbstractController
     }
 
 
-    #[Route('/add', name: 'app_personne')]
-    public function addPersonne(ManagerRegistry $doctrine): Response
+    /*#[Route('/add', name: 'app_personne')]
+    public function addPersonne(ManagerRegistry $doctrine, Request $request): Response
     {
 
-        $entityManager = $doctrine->getManager();
+        // $personne et l'image de notre formulaire
         $personne = new Personne();
-        $personne->setFirstname(firstname:'Jadjoud');
-        $personne->setName(name:'Douda');
-        $personne->setAge(age:'2');
+        $form = $this->createForm(PersonneType::class, $personne);
+        $form->remove('createdAt');
+        $form->remove('updatedAt');
 
-        //Ajouter l'opération d'insertion de la personne dans ma transaction
-        $entityManager->persist($personne);
+        // Mon formulaire va aller traiter la requete
+        $form->handleRequest($request);
+        //Est ce que le formulaire a été soumis
+        
+        if ($form->isSubmitted()) { 
+        //Si oui 
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            //on va l'ajouter dans la base de donnée
+            $manager->flush();
+            // Afficher un message de succées
+            $this->addFlash(
+               'success',
+               '$personne->getName() a été ajouté avec succées'
+            );
+            // Redireger vers la liste des personne
+            return   $this->redirectToRoute('personne.list.alls');
 
-        // Execute la transaction
-        $entityManager->flush();
+        }else{
+            // Sinon on affiche seulement le formulaire
 
-        return $this->render('personne/detail.html.twig', [
-            'personne' => $personne,
-        ]);
+            return $this->render('personne/add-personne.html.twig', [
+                'form' => $form->createView(),
+            ]);
+
+        }
+        
+    }*/
+
+
+
+    #[Route('/edit/{id?0}', name: 'personne.edit')]
+    public function addPersonne(
+        Personne $personne = null, 
+        ManagerRegistry $doctrine, 
+        Request $request, 
+        UploaderService $uploaderService,
+        MailerService $mailer
+        ): Response
+    {
+        $new = false;
+        if(!$personne){
+            $new = true;
+            // $personne et l'image de notre formulaire
+            $personne = new Personne();        
+        }
+
+        $form = $this->createForm(PersonneType::class, $personne);
+        $form->remove('createdAt');
+        $form->remove('updatedAt');
+
+        // Mon formulaire va aller traiter la requete
+        $form->handleRequest($request);
+        //Est ce que le formulaire a été soumis
+        
+        if ($form->isSubmitted() && $form->isValid()) { 
+        //Si oui 
+
+            $photo = $form->get('photo')->getData();
+
+            // this condition is needed because the 'brochure' field is not required
+            // so the PDF file must be processed only when a file is uploaded
+            if ($photo) {
+                $directory = $this->getParameter('personne_directory');
+
+                $personne->setImage($uploaderService->uploadFile($photo, $directory));
+            }
+
+
+            $manager = $doctrine->getManager();
+            $manager->persist($personne);
+            //on va l'ajouter dans la base de donnée
+            $manager->flush();
+            // Afficher un message de succées
+            if($new){
+                $message = 'a été ajouté avec succées';
+            }else{
+                $message = 'a été mis à jour avec succées';
+            }
+
+            $mailMessage = $personne->getFirstname().' '.$personne->getName().' '.$message;
+            $mailer->sendEmail(content: $mailMessage);
+            $this->addFlash(
+               'success',
+               $personne->getName().' '.$message
+            );
+            // Redireger vers la liste des personne
+            return   $this->redirectToRoute('personne.list.alls');
+
+        }else{
+            // Sinon on affiche seulement le formulaire
+
+            return $this->render('personne/add-personne.html.twig', [
+                'form' => $form->createView(),
+            ]);
+
+        }
+        
     }
+
+
 
     #[Route('/delete/{id<\d+>}', name: 'personne.delete')]
     public function deletePersonne(Personne $personne = null, ManagerRegistry $doctrine): RedirectResponse
